@@ -20,8 +20,11 @@ class AlumnosAll(generics.CreateAPIView):
         return Response(lista, 200)
     
 class AlumnosView(generics.CreateAPIView):
-    # Requiere autenticación para lectura y actualización
-    permission_classes = (permissions.IsAuthenticated,)
+    # Permisos dinámicos: permitir creación sin autenticación, proteger lectura/actualización/eliminación
+    def get_permissions(self):
+        if self.request.method == 'POST':
+            return [permissions.AllowAny()]
+        return [permissions.IsAuthenticated()]
 
     # Obtener alumno por ID
     def get(self, request, *args, **kwargs):
@@ -98,3 +101,23 @@ class AlumnosView(generics.CreateAPIView):
         user.save()
 
         return Response({"message": "Alumno actualizado correctamente", "alumno": AlumnoSerializer(alumno).data}, 200)
+
+    # Eliminar alumno
+    @transaction.atomic
+    def delete(self, request, id, *args, **kwargs):
+        try:
+            alumno = Alumnos.objects.get(id=id)
+        except Alumnos.DoesNotExist:
+            return Response(
+                {"error": "Alumno no encontrado"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        user_to_delete = alumno.user
+        alumno.delete()
+        user_to_delete.is_active = 0
+        user_to_delete.save()
+
+        return Response(
+            {"message": "Alumno eliminado correctamente"},
+            status=status.HTTP_204_NO_CONTENT
+        )

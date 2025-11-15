@@ -20,8 +20,11 @@ class AdminAll(generics.CreateAPIView):
         return Response(lista, 200)
 
 class AdminView(generics.CreateAPIView):
-    # Requiere autenticación para lectura y actualización
-    permission_classes = (permissions.IsAuthenticated,)
+    # Permisos dinámicos: permitir creación sin autenticación, proteger lectura/actualización/eliminación
+    def get_permissions(self):
+        if self.request.method == 'POST':
+            return [permissions.AllowAny()]
+        return [permissions.IsAuthenticated()]
 
     # Obtener administrador por ID
     def get(self, request, *args, **kwargs):
@@ -95,9 +98,27 @@ class AdminView(generics.CreateAPIView):
         user.save()
 
         return Response({"message": "Administrador actualizado correctamente", "admin": AdminSerializer(admin).data}, 200)
+    
+    # Eliminar administrador
+    @transaction.atomic
+    def delete(self, request, id, *args, **kwargs):
+        try:
+            admin = Administradores.objects.get(id=id)
+        except Administradores.DoesNotExist:
+            return Response(
+                {"error": "Administrador no encontrado"},
+                status=status.HTTP_404_NOT_FOUND
+                )
+        user_to_delete = admin.user
+        admin.delete()
+        user_to_delete.is_active = 0
+        user_to_delete.save()
 
+        return Response(
+            {"message": "Administrador eliminado correctamente"},
+            status=status.HTTP_204_NO_CONTENT
+        )
 
-# Endpoint de bootstrap para crear el primer administrador sin autenticación
 class BootstrapAdminView(generics.CreateAPIView):
     permission_classes = (permissions.AllowAny,)
 

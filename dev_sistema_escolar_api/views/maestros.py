@@ -26,8 +26,11 @@ class MaestrosAll(generics.CreateAPIView):
         return Response(lista, 200)
     
 class MaestrosView(generics.CreateAPIView):
-    # Requiere autenticación para lectura y actualización
-    permission_classes = (permissions.IsAuthenticated,)
+    # Permisos dinámicos: permitir creación sin autenticación, proteger lectura/actualización/eliminación
+    def get_permissions(self):
+        if self.request.method == 'POST':
+            return [permissions.AllowAny()]
+        return [permissions.IsAuthenticated()]
 
     # Obtener maestro por ID
     def get(self, request, *args, **kwargs):
@@ -110,3 +113,23 @@ class MaestrosView(generics.CreateAPIView):
                 data["materias_json"] = []
 
         return Response({"message": "Maestro actualizado correctamente", "maestro": data}, 200)
+
+    # Eliminar maestro
+    @transaction.atomic
+    def delete(self, request, id, *args, **kwargs):
+        try:
+            maestro = Maestros.objects.get(id=id)
+        except Maestros.DoesNotExist:
+            return Response(
+                {"error": "Maestro no encontrado"},
+                status=status.HTTP_404_NOT_FOUND
+                )
+        user_to_delete = maestro.user
+        maestro.delete()
+        user_to_delete.is_active = 0
+        user_to_delete.save()
+
+        return Response(
+            {"message": "Maestro eliminado correctamente"},
+            status=status.HTTP_204_NO_CONTENT
+        )
