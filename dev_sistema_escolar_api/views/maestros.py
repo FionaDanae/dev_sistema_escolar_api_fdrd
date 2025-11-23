@@ -27,7 +27,7 @@ class MaestrosAll(generics.CreateAPIView):
     
 class MaestrosView(generics.CreateAPIView):
     def get_permissions(self):
-        if self.request.method in ['GET', 'PUT', 'DELETE']:
+        if self.request.method in ['POST', 'GET', 'PUT', 'DELETE']:
             return [permissions.AllowAny()]
         return [permissions.IsAuthenticated()]
 
