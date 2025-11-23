@@ -26,9 +26,8 @@ class MaestrosAll(generics.CreateAPIView):
         return Response(lista, 200)
     
 class MaestrosView(generics.CreateAPIView):
-    # Permisos dinámicos: permitir creación sin autenticación, proteger lectura/actualización/eliminación
     def get_permissions(self):
-        if self.request.method == 'POST':
+        if self.request.method in ['GET', 'PUT', 'DELETE']:
             return [permissions.AllowAny()]
         return [permissions.IsAuthenticated()]
 
