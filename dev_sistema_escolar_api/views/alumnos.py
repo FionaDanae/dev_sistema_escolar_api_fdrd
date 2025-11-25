@@ -10,7 +10,6 @@ from rest_framework.response import Response
 from django.contrib.auth.models import Group
 from django.shortcuts import get_object_or_404
 
-
 class AlumnosAll(generics.CreateAPIView):
     permission_classes = (permissions.AllowAny,)
     def get(self, request, *args, **kwargs):
@@ -20,32 +19,27 @@ class AlumnosAll(generics.CreateAPIView):
         return Response(lista, 200)
     
 class AlumnosView(generics.CreateAPIView):
-    # Permisos dinámicos: permitir creación sin autenticación, proteger lectura/actualización/eliminación
     def get_permissions(self):
         if self.request.method in ['GET', 'PUT', 'DELETE']:
             return [permissions.IsAuthenticated()]
         return [] # POST no requiere autenticación  
 
-    # Obtener alumno por ID
     def get(self, request, *args, **kwargs):
         alumno_id = kwargs.get("id") or request.GET.get("id")
         alumno = get_object_or_404(Alumnos, id=alumno_id)
         data = AlumnoSerializer(alumno, many=False).data
         return Response(data, 200)
 
-    #Registrar nuevo usuario
     @transaction.atomic
     def post(self, request, *args, **kwargs):
 
         user = UserSerializer(data=request.data)
         if user.is_valid():
-            #Grab user data
             role = request.data['rol']
             first_name = request.data['first_name']
             last_name = request.data['last_name']
             email = request.data['email']
             password = request.data['password']
-            #Valida si existe el usuario o bien el email registrado
             existing_user = User.objects.filter(email=email).first()
 
             if existing_user:
@@ -66,7 +60,6 @@ class AlumnosView(generics.CreateAPIView):
             group.user_set.add(user)
             user.save()
 
-            #Create a profile for the user
             alumno = Alumnos.objects.create(user=user,
                                             matricula= request.data["matricula"],
                                             curp= request.data["curp"].upper(),

@@ -8,8 +8,11 @@ from dev_sistema_escolar_api.views import users
 from dev_sistema_escolar_api.views import alumnos
 from dev_sistema_escolar_api.views import maestros
 from dev_sistema_escolar_api.views import auth
+from dev_sistema_escolar_api.views import eventos
 
 urlpatterns = [
+    path('admin-django/', admin.site.urls),
+    path('version/', bootstrap.VersionView.as_view()),
    #Create Admin
         path('admin/', users.AdminView.as_view()),
     #Delete Admin
@@ -35,7 +38,13 @@ urlpatterns = [
     #Login
         path('login/', auth.CustomAuthToken.as_view()),
     #Logout
-        path('logout/', auth.Logout.as_view())
+        path('logout/', auth.Logout.as_view()),
+    #Create Evento
+        path('eventos/', eventos.EventosView.as_view()),
+    #Delete Evento
+        path('eventos/<int:id>/', eventos.EventosView.as_view()),
+    # Evento Data
+        path('lista-eventos/', eventos.EventosAll.as_view())
 ]
 
 if settings.DEBUG:

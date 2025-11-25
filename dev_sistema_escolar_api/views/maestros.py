@@ -12,7 +12,6 @@ import json
 from django.shortcuts import get_object_or_404
 
 class MaestrosAll(generics.CreateAPIView):
-    # Listado público para cumplir con la práctica de tablas
     permission_classes = (permissions.AllowAny,)
     def get(self, request, *args, **kwargs):
         maestros = Maestros.objects.filter(user__is_active=1).order_by("id")
@@ -43,7 +42,6 @@ class MaestrosView(generics.CreateAPIView):
                 data["materias_json"] = []
         return Response(data, 200)
 
-    #Registrar nuevo usuario maestro
     @transaction.atomic
     def post(self, request, *args, **kwargs):
         user = UserSerializer(data=request.data)
@@ -68,7 +66,6 @@ class MaestrosView(generics.CreateAPIView):
             group, created = Group.objects.get_or_create(name=role)
             group.user_set.add(user)
             user.save()
-            #Create a profile for the user
             maestro = Maestros.objects.create(user=user,
                                             id_trabajador= request.data["id_trabajador"],
                                             fecha_nacimiento= request.data["fecha_nacimiento"],

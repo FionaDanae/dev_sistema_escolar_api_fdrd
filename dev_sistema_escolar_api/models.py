@@ -60,3 +60,25 @@ class Maestros(models.Model):
 
     def __str__(self):
         return "Perfil del maestro "+self.first_name+" "+self.last_name
+    
+class Eventos(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    nombre_evento = models.CharField(max_length=255, null=False, blank=False)
+    tipo_evento = models.CharField(max_length=100, null=False, blank=False)
+    fecha_realizacion = models.DateField(null=False, blank=False)
+    hora_inicio = models.TimeField(null=False, blank=False)
+    hora_fin = models.TimeField(null=False, blank=False)
+    lugar = models.CharField(max_length=255, null=False, blank=False)
+    publico_estudiantes = models.BooleanField(default=False)
+    publico_profesores = models.BooleanField(default=False)
+    publico_general = models.BooleanField(default=False)
+    programa_educativo = models.CharField(max_length=255, null=True, blank=True)
+    responsable_id = models.IntegerField(null=False, blank=False)
+    responsable_tipo = models.CharField(max_length=50, null=True, blank=True)
+    descripcion = models.TextField(max_length=300, null=False, blank=False)
+    cupo_maximo = models.IntegerField(null=False, blank=False)
+    creation = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    update = models.DateTimeField(null=True, blank=True)
+
+    def __str__(self):
+        return "Evento: "+self.nombre_evento+" - "+self.tipo_evento

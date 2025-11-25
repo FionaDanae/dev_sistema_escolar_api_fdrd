@@ -21,8 +21,8 @@ class AdminAll(generics.CreateAPIView):
 class AdminView(generics.CreateAPIView):
     def get_permissions(self):
         if self.request.method in ['GET', 'PUT', 'DELETE']:
-            return [permissions.AllowAny()]
-        return [permissions.IsAuthenticated()]
+            return [permissions.IsAuthenticated()]
+        return [] # POST no requiere autenticación
 
     def get(self, request, *args, **kwargs):
         admin = get_object_or_404(Administradores, id=request.GET.get("id"))
